@@ -12,10 +12,13 @@ function Board() {
   const size = 9;
   
   const fetchGame = useCallback(async (subscribed) => {
-    const data = await generateGame(difficulty);
+    if (!difficulty) return;
     const sudoko = new Sudoko();
     sudokoGame.current = sudoko;
-    const board = sudoko.initializeBoard(data);
+    let board = sudoko.createBoard(size);
+    setMatrix([...board]);
+    const data = await generateGame(difficulty);
+    sudoko.initializeBoard(board, data);
     if (subscribed) {
       setMatrix([...board]);
     }
@@ -39,7 +42,7 @@ function Board() {
   const squareItems = matrix.map((row, rowIndex) => {
     return row.map((col, colIndex) => {
       let id = `${rowIndex}${colIndex}`;
-      return <Square id={id} value={col} onChange={squareValueChange} />
+      return <Square key={id} id={id} value={col} onChange={squareValueChange} />
     });
   });
 
@@ -56,24 +59,25 @@ function Board() {
 
   const validate = () => {
     const sudoko = sudokoGame.current;
-    const cloneMatrix = [...matrix];
-    const valid = sudoko.solveSudoku(cloneMatrix, size);
+    const valid = sudoko.validateSudoku(matrix, size);
     if (valid) {
-      setResult('solved');
+      setResult('valid');
     } else {
       setResult('broken');
     }
   };
 
-  const setDifficultyType = (setDifficultyType) => {
-    setDifficulty(setDifficultyType);
+  const setDifficultyType = (difficultyType) => {
+    setDifficulty(difficultyType);
     setResult('unsolved');
   };
 
   const clear = () => {
     const sudoko = sudokoGame.current;
-    let matrix = sudoko.clear();
+    let matrix = sudoko.createBoard(size);
     setMatrix([...matrix]);
+    setResult('');
+    setDifficulty('');
   }
 
   return (
@@ -101,7 +105,7 @@ function Board() {
           <button className='solve' onClick={() => validate()}>Validate</button>
         </div>
         <div className='gap'>
-        <button className='solve' onClick={() => solve()}>Solve</button>
+          <button className='solve' onClick={() => solve()}>Solve</button>
         </div>
       </div>
     </>

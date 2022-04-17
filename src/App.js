@@ -1,12 +1,14 @@
 import './App.css';
-import Board from './components/Board';
+import React from 'react';
+const Board = React.lazy(() => import('./components/Board'));
 
 function App() {
-
   return (
     <>
       <div className='main'>
-        <Board />
+        <React.Suspense fallback='loading...'>
+          <Board />
+        </React.Suspense>
       </div>
     </>
   );

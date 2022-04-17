@@ -1,21 +1,17 @@
 export default class Sudoku {
 
   canAddToRow(board, row, num) {
-    for(let col = 0; col < board.length; col++)
-    {
-        if (board[row][col] === num)
-        {
-            return false;
+    for(let col = 0; col < board.length; col++) {
+        if (board[row][col] === num) {
+          return false;
         }
     }
     return true;
   }
   
   canAddToCol(board, col, num) {
-    for(let row = 0; row < board.length; row++)
-    {
-        if (board[row][col] === num)
-        {
+    for(let row = 0; row < board.length; row++) {
+        if (board[row][col] === num) {
             return false;
         }
     }
@@ -24,16 +20,13 @@ export default class Sudoku {
   
   canAddToGrid(board, row, col, num) {
     let sqrt = Math.floor(Math.sqrt(board.length));
-    let boxRowStart = row - row % sqrt;
-    let boxColStart = col - col % sqrt;
-    for(let r = boxRowStart; r < boxRowStart + sqrt; r++)
-    {
-      for(let d = boxColStart; d < boxColStart + sqrt; d++)
-      {
-          if (board[r][d] === num)
-          {
-              return false;
-          }
+    let gridRowStart = row - row % sqrt;
+    let gridColStart = col - col % sqrt;
+    for(let r = gridRowStart; r < gridRowStart + sqrt; r++) {
+      for(let c = gridColStart; c < gridColStart + sqrt; c++) {
+        if (board[r][c] === num) {
+            return false;
+        }
       }
     }
     return true;
@@ -46,12 +39,12 @@ export default class Sudoku {
       return false;
     }
     
-    // see if the number can be added to the row
+    // see if the number can be added to the column
     if(!this.canAddToCol(board, col, num)) {
       return false;
     }
   
-    // see if the number can be added to the row
+    // see if the number can be added to the grid
     if(!this.canAddToGrid(board, row, col, num)) {
       return false;
     }
@@ -108,7 +101,7 @@ export default class Sudoku {
     return false;
   }
 
-  initializeBoard(data) {
+  initializeBoard(board, data) {
     const rowMap = {
       A: 0,
       B: 1,
@@ -120,7 +113,6 @@ export default class Sudoku {
       H: 7,
       I: 8
     }
-    let board = this.clear();
     const puzzle = data.puzzle;
     for(const entry in puzzle) {
       const value = puzzle[entry];
@@ -128,15 +120,30 @@ export default class Sudoku {
       const col = parseInt(entry[1]) - 1;
       board[row][col] = parseInt(value);
     }
-    return board;
   }
 
-  clear() {
-    let board = new Array(9);
+  createBoard(size) {
+    let board = new Array(size);
     for(let i = 0; i < board.length; i++) {
-      board[i] = new Array(9).fill(0);
+      board[i] = new Array(size).fill(0);
     }
     return board;
   }
 
+  validateSudoku(board, n) {
+    for(let i = 0; i < n; i++) {
+      for(let j = 0; j < n; j++) {
+        if (this.canAddToRow(board, i, j + 1)) {
+          return false;
+        }
+        if (this.canAddToCol(board, j, i + 1)) {
+          return false;
+        }
+        if (this.canAddToGrid(board, i, j, board[i][j])) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 }
