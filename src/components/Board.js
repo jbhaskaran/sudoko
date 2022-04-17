@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Square from './Square';
 import Sudoko from '../sudoko/sudoko'
 import generateGame from '../api/api';
@@ -10,25 +10,24 @@ function Board() {
   const [matrix, setMatrix] = useState([]);
   const sudokoGame = useRef();
   const size = 9;
-  
-  const fetchGame = useCallback(async (subscribed) => {
+
+  useEffect(() => {
     if (!difficulty) return;
+    let subscribed = true;
     const sudoko = new Sudoko();
     sudokoGame.current = sudoko;
     let board = sudoko.createBoard(size);
     setMatrix([...board]);
-    const data = await generateGame(difficulty);
-    sudoko.initializeBoard(board, data);
-    if (subscribed) {
-      setMatrix([...board]);
-    }
-  }, [difficulty]);
-
-  useEffect(() => {
-    let subscribed = true;
-    fetchGame(subscribed).catch('Error');
+    const fetchGame = async () => {
+      const data = await generateGame(difficulty);
+      sudoko.initializeBoard(board, data);
+      if (subscribed) {
+        setMatrix([...board]);
+      }
+    };
+    fetchGame().catch('Error');
     return () => subscribed = false;
-  }, [fetchGame]);
+  }, [difficulty]);
 
   const squareValueChange = (e) => {
     const value = e.target.value;
